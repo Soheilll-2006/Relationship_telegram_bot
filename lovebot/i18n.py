@@ -120,6 +120,74 @@ STRINGS: dict[str, dict[str, str]] = {
             "Use the menu below or /menu. Tweak anything from /settings. 💖"
         ),
     },
+    "onboarding_done_group_hint": {
+        "fa": (
+            "💡 *نکته:* پیام‌های روزانه پیش‌فرض به همین چت خصوصی میان.\n"
+            "اگه می‌خوای به جاش به یه گروه مشترک با پارتنرت برن:\n\n"
+            "1️⃣ ربات (@{bot}) رو به گروهتون اضافه کن.\n"
+            "2️⃣ توی همون گروه دستور `/linkhere` رو بزن.\n\n"
+            "هر وقت بخوای می‌تونی با `/unlinkhere` برگردونیش به پی‌وی."
+        ),
+        "en": (
+            "💡 *Tip:* daily messages go to this private chat by default.\n"
+            "Want them to go to a shared group with your partner instead?\n\n"
+            "1️⃣ Add @{bot} to your group.\n"
+            "2️⃣ In that group, send `/linkhere`.\n\n"
+            "You can revert anytime with `/unlinkhere`."
+        ),
+    },
+    # ----------------------------------------------------------- group linking
+    "link_not_onboarded": {
+        "fa": (
+            "👋 سلام! اول لازمه توی پی‌وی من `/start` بزنی و راه‌اندازی رو "
+            "کامل کنی، بعد می‌تونی توی این گروه `/linkhere` بزنی."
+        ),
+        "en": (
+            "👋 Hi! Please /start me in private first and finish setup, "
+            "then come back here and send /linkhere."
+        ),
+    },
+    "link_must_be_group": {
+        "fa": "ℹ️ این دستور رو *داخل گروهی* که می‌خوای پیام‌ها بهش بره بزن.",
+        "en": "ℹ️ Send this command *inside the group* you want messages delivered to.",
+    },
+    "link_already": {
+        "fa": "ℹ️ پیام‌های روزانه‌ی {name} از قبل به این گروه می‌اومد.",
+        "en": "ℹ️ {name}'s daily messages already come to this group.",
+    },
+    "link_success": {
+        "fa": (
+            "✅ از این به بعد پیام‌های روزانه‌ی *{name}* به این گروه می‌رسه! 💖\n"
+            "برای برگردوندنش به پی‌وی: `/unlinkhere`"
+        ),
+        "en": (
+            "✅ From now on, *{name}*'s daily messages will be delivered here! 💖\n"
+            "Revert anytime with `/unlinkhere`."
+        ),
+    },
+    "unlink_success": {
+        "fa": "🔄 برگشت به پی‌وی. پیام‌های روزانه دوباره مستقیم برای {name} می‌رسه.",
+        "en": "🔄 Reverted to private chat. {name}'s daily messages will arrive privately again.",
+    },
+    "unlink_nothing": {
+        "fa": "ℹ️ چیزی برای unlink کردن نیست — پیام‌ها از همون اول به پی‌وی می‌رسه.",
+        "en": "ℹ️ Nothing to unlink — messages were already going to your private chat.",
+    },
+    "bot_added_to_group": {
+        "fa": (
+            "👋 سلام! من *LoveBot* هستم 💕\n"
+            "اگه می‌خوای پیام‌های روزانه‌ت اینجا برسه، توی پی‌وی من `/start` بزن، "
+            "بعد توی همین گروه `/linkhere` رو بزن."
+        ),
+        "en": (
+            "👋 Hi, I'm *LoveBot* 💕\n"
+            "If you'd like your daily messages here, /start me in private first, "
+            "then send /linkhere in this group."
+        ),
+    },
+    "delivery_private": {"fa": "پی‌وی", "en": "private"},
+    "delivery_group": {"fa": "گروه {id}", "en": "group {id}"},
+    "settings_delivery_label": {"fa": "📨 مقصد پیام", "en": "📨 Delivery"},
     # ------------------------------------------------------------------ errors
     "err_bad_date": {
         "fa": "❌ این تاریخ معتبر نیست. دوباره با فرمت *YYYY-MM-DD* وارد کن.",
@@ -405,6 +473,8 @@ STRINGS: dict[str, dict[str, str]] = {
             "🔸 /mood — ثبت حال امروز\n"
             "🔸 /lovescore — امتیاز عشق و استریک\n"
             "🔸 /settings — تنظیمات (زبان، تاریخ، ساعت…)\n"
+            "🔸 /linkhere — *داخل گروه:* مقصد پیام روزانه رو همین گروه کن\n"
+            "🔸 /unlinkhere — برگردوندن مقصد به پی‌وی\n"
             "🔸 /skip — رد کردن سؤال جاری\n"
             "🔸 /cancel — لغو عملیات جاری\n\n"
             "💡 *نکته:* کوت‌ها هیچ‌وقت تکرار نمی‌شن تا کل لیست رو ببینی، "
@@ -423,6 +493,8 @@ STRINGS: dict[str, dict[str, str]] = {
             "🔸 /mood — log today's mood\n"
             "🔸 /lovescore — your love score & streak\n"
             "🔸 /settings — settings (language, dates, time…)\n"
+            "🔸 /linkhere — *inside a group:* deliver daily messages there\n"
+            "🔸 /unlinkhere — revert delivery to your private chat\n"
             "🔸 /skip — skip the current question\n"
             "🔸 /cancel — cancel the current action\n\n"
             "💡 *Tip:* quotes never repeat until the whole catalogue is seen, "

@@ -21,6 +21,7 @@ SCHEMA = """
 CREATE TABLE IF NOT EXISTS users (
     user_id            INTEGER PRIMARY KEY,
     chat_id            INTEGER NOT NULL,
+    delivery_chat_id   INTEGER,        -- when set, daily messages go here instead of chat_id
     language           TEXT    NOT NULL DEFAULT 'fa',
     state              TEXT    NOT NULL DEFAULT 'idle',
     user_name          TEXT,
@@ -83,7 +84,18 @@ class Database:
         self._conn.execute("PRAGMA foreign_keys=ON;")
         with self._lock:
             self._conn.executescript(SCHEMA)
+            self._migrate()
         logger.info("Database ready at %s", self.path)
+
+    def _migrate(self) -> None:
+        """Apply forward-only schema migrations for existing databases."""
+        cur = self._conn.cursor()
+        cur.execute("PRAGMA table_info(users)")
+        cols = {row[1] for row in cur.fetchall()}
+        if "delivery_chat_id" not in cols:
+            logger.info("Migrating: adding users.delivery_chat_id")
+            cur.execute("ALTER TABLE users ADD COLUMN delivery_chat_id INTEGER")
+        cur.close()
 
     # ------------------------------------------------------------------ infra
 
@@ -137,6 +149,10 @@ class Database:
 
     def set_state(self, user_id: int, state: str) -> None:
         self.update_user(user_id, state=state)
+
+    def set_delivery_chat(self, user_id: int, delivery_chat_id: int | None) -> None:
+        """Pin daily messages for ``user_id`` to a given chat (group/private)."""
+        self.update_user(user_id, delivery_chat_id=delivery_chat_id)
 
     def list_active_users(self) -> list[dict[str, Any]]:
         """Users who have completed onboarding and want daily messages."""

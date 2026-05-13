@@ -188,10 +188,26 @@ class LoveBot:
 
         @b.message_handler(commands=["settings"])
         def _settings(msg: types.Message) -> None:
+            if msg.chat.type != "private":
+                return
             self._send_settings(msg.chat.id, msg.from_user.id)
 
+        # ----- group linking -----
+        @b.message_handler(commands=["linkhere"])
+        def _linkhere(msg: types.Message) -> None:
+            self._cmd_linkhere(msg)
+
+        @b.message_handler(commands=["unlinkhere"])
+        def _unlinkhere(msg: types.Message) -> None:
+            self._cmd_unlinkhere(msg)
+
+        # ----- bot added to a group / new chat members -----
+        @b.message_handler(content_types=["new_chat_members"])
+        def _new_members(msg: types.Message) -> None:
+            self._handle_new_chat_members(msg)
+
         # ----- text router (onboarding + free-form inputs) -----
-        @b.message_handler(func=lambda m: True, content_types=["text"])
+        @b.message_handler(func=lambda m: m.chat.type == "private", content_types=["text"])
         def _text(msg: types.Message) -> None:
             self._route_text(msg)
 
@@ -205,6 +221,16 @@ class LoveBot:
     # =====================================================================
 
     def _cmd_start(self, msg: types.Message) -> None:
+        # Only meaningful in private chats.
+        if msg.chat.type != "private":
+            try:
+                self.bot.reply_to(msg, t("fa", "link_must_be_group").replace(
+                    "داخل گروهی که می‌خوای پیام‌ها بهش بره",
+                    "توی پی‌وی من"
+                ))
+            except ApiException:
+                pass
+            return
         user = self.db.upsert_user(msg.from_user.id, msg.chat.id)
         if user["state"] == S_READY and user.get("relationship_start"):
             lang = _user_lang(user)
@@ -222,6 +248,72 @@ class LoveBot:
             t("fa", "welcome_pick_language"),  # Use Persian until they pick
             reply_markup=language_keyboard(prefix="lang"),
         )
+
+    # =====================================================================
+    # /linkhere — pin daily delivery to the current group
+    # =====================================================================
+
+    def _cmd_linkhere(self, msg: types.Message) -> None:
+        if msg.chat.type == "private":
+            user = self.db.get_user(msg.from_user.id)
+            lang = _user_lang(user)
+            self.bot.reply_to(msg, t(lang, "link_must_be_group"))
+            return
+
+        user = self.db.get_user(msg.from_user.id)
+        # Must have completed onboarding (relationship_start exists).
+        if not user or not user.get("relationship_start"):
+            # We don't know their language yet; assume fa as a sensible default.
+            lang = _user_lang(user) if user else "fa"
+            self.bot.reply_to(msg, t(lang, "link_not_onboarded"))
+            return
+
+        lang = _user_lang(user)
+        name = user.get("user_name") or msg.from_user.first_name or ""
+
+        if int(user.get("delivery_chat_id") or 0) == msg.chat.id:
+            self.bot.reply_to(msg, t(lang, "link_already", name=name))
+            return
+
+        self.db.set_delivery_chat(msg.from_user.id, msg.chat.id)
+        self.bot.reply_to(
+            msg, t(lang, "link_success", name=name), parse_mode="Markdown"
+        )
+
+    def _cmd_unlinkhere(self, msg: types.Message) -> None:
+        user = self.db.get_user(msg.from_user.id)
+        if not user:
+            return
+        lang = _user_lang(user)
+        name = user.get("user_name") or msg.from_user.first_name or ""
+
+        if not user.get("delivery_chat_id"):
+            self.bot.reply_to(msg, t(lang, "unlink_nothing"))
+            return
+
+        self.db.set_delivery_chat(msg.from_user.id, None)
+        self.bot.reply_to(msg, t(lang, "unlink_success", name=name))
+
+    def _handle_new_chat_members(self, msg: types.Message) -> None:
+        """Greet the chat when the bot itself is added to a group."""
+        me = self.bot.get_me()
+        added_self = any(
+            getattr(member, "id", None) == me.id
+            for member in (msg.new_chat_members or [])
+        )
+        if not added_self:
+            return
+        # We don't know who added us, so default to Persian; users can pick lang
+        # later when they /start in private.
+        bot_username = me.username or "LoveBot"
+        try:
+            self.bot.send_message(
+                msg.chat.id,
+                t("fa", "bot_added_to_group").replace("@LoveBot", f"@{bot_username}"),
+                parse_mode="Markdown",
+            )
+        except ApiException as exc:
+            logger.warning("Failed to greet group: %s", exc)
 
     # =====================================================================
     # text routing — handles state-machine inputs (names, dates, etc.)
@@ -744,6 +836,21 @@ class LoveBot:
             _safe_edit(self.bot, chat_id, edit_msg_id, msg)
         else:
             self.bot.send_message(chat_id, msg)
+
+        # Helpful hint about the group delivery option.
+        try:
+            bot_username = (self.bot.get_me().username or "LoveBot")
+        except ApiException:
+            bot_username = "LoveBot"
+        try:
+            self.bot.send_message(
+                chat_id,
+                t(lang, "onboarding_done_group_hint", bot=bot_username),
+                parse_mode="Markdown",
+            )
+        except ApiException as exc:
+            logger.warning("Group hint send failed: %s", exc)
+
         self._send_main_menu(chat_id, user_id)
 
     # =====================================================================
@@ -979,6 +1086,11 @@ class LoveBot:
         self._send_or_edit(chat_id, edit_msg_id, text, settings_keyboard(lang))
 
     def _settings_summary(self, user: dict[str, Any], lang: str) -> str:
+        delivery = user.get("delivery_chat_id")
+        if delivery:
+            delivery_label = t(lang, "delivery_group", id=delivery)
+        else:
+            delivery_label = t(lang, "delivery_private")
         rows = [
             f"👤 {user.get('user_name') or '—'}",
             f"💞 {user.get('partner_name') or '—'}",
@@ -986,6 +1098,7 @@ class LoveBot:
             f"🎂 {user.get('user_birthday') or '—'}  /  🎁 {user.get('partner_birthday') or '—'}",
             f"⏰ {int(user.get('daily_hour') or 9):02d}:{int(user.get('daily_minute') or 0):02d} ({user.get('timezone') or 'UTC'})",
             f"🔔 {'on' if user.get('daily_enabled') else 'off'}",
+            f"{t(lang, 'settings_delivery_label')}: {delivery_label}",
         ]
         return "\n\n" + "\n".join(rows)
 
@@ -1027,7 +1140,7 @@ class LoveBot:
         """Send the daily love message to one user."""
         if not user.get("relationship_start"):
             return
-        chat_id = int(user["chat_id"])
+        chat_id = int(user.get("delivery_chat_id") or user["chat_id"])
         user_id = int(user["user_id"])
         lang = _user_lang(user)
 
@@ -1068,11 +1181,12 @@ class LoveBot:
             tz = get_tz(user.get("timezone") or "UTC")
             today = datetime.now(tz).date()
             md = f"{today.month:02d}-{today.day:02d}"
+            target = int(user.get("delivery_chat_id") or user["chat_id"])
 
             if user.get("user_birthday") == md:
                 try:
                     self.bot.send_message(
-                        int(user["chat_id"]),
+                        target,
                         t(lang, "birthday_user", name=user.get("user_name") or ""),
                         parse_mode="Markdown",
                     )
@@ -1082,7 +1196,7 @@ class LoveBot:
             if user.get("partner_birthday") == md:
                 try:
                     self.bot.send_message(
-                        int(user["chat_id"]),
+                        target,
                         t(lang, "birthday_partner",
                           partner=user.get("partner_name") or ""),
                         parse_mode="Markdown",

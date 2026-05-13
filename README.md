@@ -30,6 +30,17 @@
 - اسم خودش و پارتنرش، تاریخ شروع رابطه، تولدها، ساعت پیام روزانه و منطقه‌ی زمانی رو وارد می‌کنه.
 - هر روز رأس ساعتی که گفته، یه پیام عاشقانه‌ی غافلگیر‌کننده (با کوت، توصیه، و در روزای خاص جشن) دریافت می‌کنه.
 
+### 📨 پیام کجا فرستاده می‌شه؟
+
+دو حالت داریم (هردو هم پشتیبانی می‌شن):
+
+| حالت | چطوری فعالش کنیم | مزیت |
+| --- | --- | --- |
+| 🤍 **پی‌وی (پیش‌فرض)** | فقط `/start` بزنی توی پی‌وی ربات | هر کس پیام شخصی خودش رو می‌گیره |
+| 👥 **گروه مشترک** | بعد از `/start`، ربات رو به گروه دونفره‌تون اضافه کن و توی گروه `/linkhere` بزن | یه پیام مشترک برای هر دو نفر |
+
+برای برگردوندن به پی‌وی، توی همون گروه `/unlinkhere` رو بزن.
+
 ### ✨ فیچرها
 
 | | |
@@ -64,6 +75,8 @@
 | `/mood` | ثبت حال امروز |
 | `/lovescore` | امتیاز و استریک شما |
 | `/settings` | تنظیمات (زبان، نام، تاریخ، ساعت...) |
+| `/linkhere` | **داخل گروه** — مقصد پیام روزانه رو همون گروه کن |
+| `/unlinkhere` | برگردوندن مقصد به پی‌وی |
 | `/help` | راهنما |
 | `/skip` | رد کردن سؤال جاری |
 | `/cancel` | لغو عملیات جاری |
@@ -154,6 +167,17 @@ telegram-relationship-bot/
 - Enters their and their partner's names, the relationship start date, birthdays, daily-message time and timezone.
 - Receives a sweet daily love note at the exact time they chose — with quotes, advice, milestone celebrations and birthday surprises.
 
+### 📨 Where do messages get delivered?
+
+Two modes, both supported:
+
+| Mode | How to enable | Why |
+| --- | --- | --- |
+| 🤍 **Private (default)** | Just `/start` the bot in DM | Each partner gets their own personal feed |
+| 👥 **Shared group** | After `/start`, add the bot to your couple group, then send `/linkhere` in the group | One shared daily message for both partners |
+
+Run `/unlinkhere` in the same group to revert to private delivery.
+
 ### ✨ Features
 
 | | |
@@ -188,6 +212,8 @@ telegram-relationship-bot/
 | `/mood` | Log today's mood |
 | `/lovescore` | Score & streak |
 | `/settings` | Change language, names, dates, time… |
+| `/linkhere` | **In a group** — deliver daily messages to that group |
+| `/unlinkhere` | Revert delivery to your private chat |
 | `/help` | Help |
 | `/skip` | Skip the current question |
 | `/cancel` | Cancel current action |

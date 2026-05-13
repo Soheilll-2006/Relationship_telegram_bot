@@ -1,10 +1,41 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "repl-nix-workspace"
-version = "0.1.0"
-description = "Add your description here"
-requires-python = ">=3.11"
-dependencies = [
-    "flask>=3.1.1",
-    "pytelegrambotapi>=4.27.0",
-    "schedule>=1.2.2",
+name = "lovebot"
+version = "2.0.0"
+description = "A bilingual (Persian/English) Telegram bot for couples — daily love quotes, milestone tracking, mood check-ins, challenges, and more."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Soheilll-2006" }
 ]
+keywords = ["telegram", "bot", "relationship", "couples", "love", "persian", "farsi"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Communications :: Chat",
+]
+dependencies = [
+    "pyTelegramBotAPI>=4.27.0",
+    "APScheduler>=3.10.4",
+    "pytz>=2024.1",
+    "python-dotenv>=1.0.1",
+    "Flask>=3.0.0",
+]
+
+[project.scripts]
+lovebot = "main:main"
+
+[project.urls]
+Homepage = "https://github.com/Soheilll-2006/telegram-relationship-bot"
+Issues = "https://github.com/Soheilll-2006/telegram-relationship-bot/issues"
+
+[tool.setuptools]
+packages = ["lovebot", "lovebot.content"]

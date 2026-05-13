@@ -1,53 +1,56 @@
-#!/usr/bin/env python3
-"""
-Main entry point for the Telegram relationship bot.
-This file starts the Flask keep-alive server and the bot scheduler.
-"""
+"""Entry point — wire up settings, database, bot, scheduler, and (optional) keep-alive."""
 
-import threading
-import time
+from __future__ import annotations
+
 import logging
-from bot import RelationshipBot
-from keep_alive import keep_alive
-from scheduler import start_scheduler
+import sys
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('bot.log'),
-        logging.StreamHandler()
-    ]
-)
+from lovebot import __version__
+from lovebot.bot import LoveBot
+from lovebot.config import Settings
+from lovebot.database import Database
+from lovebot.keep_alive import start_keep_alive
+from lovebot.scheduler import DailyScheduler
 
-logger = logging.getLogger(__name__)
 
-def main():
-    """Main function to start the bot and keep-alive server."""
+def configure_logging(level: str) -> None:
+    logging.basicConfig(
+        level=getattr(logging, level, logging.INFO),
+        format="%(asctime)s | %(levelname)-7s | %(name)s | %(message)s",
+        handlers=[
+            logging.StreamHandler(stream=sys.stdout),
+            logging.FileHandler("lovebot.log", encoding="utf-8"),
+        ],
+    )
+
+
+def main() -> None:
     try:
-        logger.info("🚀 Starting Telegram Relationship Bot...")
-        
-        # Start the keep-alive server in a separate thread
-        keep_alive_thread = threading.Thread(target=keep_alive, daemon=True)
-        keep_alive_thread.start()
-        logger.info("✅ Keep-alive server started")
-        
-        # Initialize the bot
-        bot = RelationshipBot()
-        
-        # Start the scheduler in a separate thread
-        scheduler_thread = threading.Thread(target=start_scheduler, args=(bot,), daemon=True)
-        scheduler_thread.start()
-        logger.info("✅ Message scheduler started")
-        
-        # Start the bot polling
-        logger.info("✅ Bot is now running and listening for messages...")
-        bot.start_polling()
-        
-    except Exception as e:
-        logger.error(f"❌ Error starting bot: {e}")
-        raise
+        settings = Settings.from_env()
+    except RuntimeError as exc:
+        print(f"\n❌ {exc}\n", file=sys.stderr)
+        sys.exit(1)
+
+    configure_logging(settings.log_level)
+    log = logging.getLogger("lovebot.main")
+    log.info("🚀 Starting LoveBot v%s", __version__)
+
+    db = Database(settings.db_path)
+    bot = LoveBot(token=settings.bot_token, db=db)
+    scheduler = DailyScheduler(bot, db)
+    scheduler.start()
+
+    if settings.keep_alive:
+        start_keep_alive(settings.keep_alive_port)
+
+    try:
+        bot.run()
+    except KeyboardInterrupt:
+        log.info("👋 Shutting down (Ctrl+C).")
+    finally:
+        scheduler.stop()
+        db.close()
+
 
 if __name__ == "__main__":
     main()

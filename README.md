@@ -27,7 +27,7 @@
   <img src="https://img.shields.io/badge/i18n-🇮🇷_FA_·_🇬🇧_EN-EC4899?style=for-the-badge" alt="Languages"/>
   <img src="https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge" alt="License"/>
   <img src="https://img.shields.io/badge/Made_with-💕-FF1493?style=for-the-badge" alt="Made with love"/>
-  <img src="https://img.shields.io/github/stars/Soheilll-2006/telegram-relationship-bot?style=for-the-badge&logo=github&color=F59E0B" alt="Stars"/>
+  <img src="https://img.shields.io/github/stars/Soheilll-2006/Relationship_telegram_bot?style=for-the-badge&logo=github&color=F59E0B" alt="Stars"/>
 </p>
 
 <!-- content stats -->
@@ -113,8 +113,8 @@
 
 ```bash
 # ۱) کلون
-git clone https://github.com/Soheilll-2006/telegram-relationship-bot.git
-cd telegram-relationship-bot
+git clone https://github.com/Soheilll-2006/Relationship_telegram_bot.git
+cd Relationship_telegram_bot
 
 # ۲) ساخت محیط مجازی
 python -m venv .venv
@@ -148,7 +148,7 @@ KEEP_ALIVE_PORT=5000
 ### 📁 ساختار پروژه
 
 ```
-telegram-relationship-bot/
+Relationship_telegram_bot/
 ├── main.py                # نقطه‌ی شروع
 ├── requirements.txt
 ├── pyproject.toml
@@ -238,8 +238,8 @@ Run `/unlinkhere` in the same group to revert to private delivery.
 
 ```bash
 # 1) Clone
-git clone https://github.com/Soheilll-2006/telegram-relationship-bot.git
-cd telegram-relationship-bot
+git clone https://github.com/Soheilll-2006/Relationship_telegram_bot.git
+cd Relationship_telegram_bot
 
 # 2) Create a virtualenv
 python -m venv .venv
@@ -306,8 +306,8 @@ MIT — see `LICENSE` (or the header in `pyproject.toml`).
 
 <br/>
 
-<a href="https://github.com/Soheilll-2006/telegram-relationship-bot/stargazers">
-  <img src="https://img.shields.io/github/stars/Soheilll-2006/telegram-relationship-bot?style=social" alt="Star the repo"/>
+<a href="https://github.com/Soheilll-2006/Relationship_telegram_bot/stargazers">
+  <img src="https://img.shields.io/github/stars/Soheilll-2006/Relationship_telegram_bot?style=social" alt="Star the repo"/>
 </a>
 
 <br/><br/>
